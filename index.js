@@ -35,8 +35,7 @@ var inquirer = require('inquirer');
   const allEmployeeView = () => {
     connection.query('SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department,CONCAT(manager.first_name," ",manager.last_name) AS manager, role.salary FROM employee LEFT JOIN role on employee.role_id = role.id LEFT JOIN department on role.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id;', (err, res) => {
       if (err) throw err;
-      console.table(res)
-      connection.end();
+      console.table(res);
     });
   };
 
@@ -122,75 +121,57 @@ var inquirer = require('inquirer');
     });
   };
 
-newDep();
+  const newEmployee = () => {
+    let roleChoices = [];
+    let managerChoices = [];
+
+    for (i = 0; i < roles.length; i++) {
+      roleChoices.push(Object(roles[i]))};
+
+    for (i = 0; i < roles.length; i++) {
+      managerChoices.push(Object(roles[i]))};
+
+    inquirer
+    .prompt([
+      {
+        type: "input",
+        message:"Please input employees first name.",
+        name: "first_name"
+      },
+      {
+        type: "input",
+        message:"Please input employees last name.",
+        name: "last_name"
+      },
+      {
+        type: "list",
+        message:"Please select the role for this employee.",
+        choices : function () {
+          connection.query(`INSERT INTO department (name) values ('${answers.name}')`, (err, res) => {
+            if (err) throw err;
+          });
+        },
+        name: "name"
+      },
+      {
+        type: "list",
+        message:"Please select the manager for this employee.",
+        name: "name"
+      },
+    ])
+    .then(answers => {
+      connection.query(`INSERT INTO department (name) values ('${answers.name}')`, (err, res) => {
+        if (err) throw err;
+      });
+    })
+    .catch(error => {
+      if(error.isTtyError) {
+      }
+    });
+  };
+
+newEmployee();
 
 
 app.listen(PORT);
 
-// // Use Handlebars to render the main index.html page with the plans in it.
-// app.get("/", function(req, res) {
-//   connection.query("SELECT * FROM plans;", function(err, data) {
-//     if (err) {
-//       return res.status(500).end();
-//     }
-
-//     res.render("index", { plans: data });
-//   });
-// });
-
-
-
-
-// app.use(express.static(path.join(__dirname, '/')));
-
-
-// // Create a new plan
-// app.post("/api/plans", function(req, res) {
-//   connection.query("INSERT INTO plans (plan) VALUES (?)", [req.body.plan], function(err, result) {
-//     if (err) {
-//       return res.status(500).end();
-//     }
-
-//     // Send back the ID of the new plan
-//     res.json({ id: result.insertId });
-//     console.log({ id: result.insertId });
-//   });
-// });
-
-// // Update a plan
-// app.put("/api/plans/:id", function(req, res) {
-//   connection.query("UPDATE plans SET plan = ? WHERE id = ?", [req.body.plan, req.params.id], function(err, result) {
-//     if (err) {
-//       // If an error occurred, send a generic server failure
-//       return res.status(500).end();
-//     }
-//     else if (result.changedRows === 0) {
-//       // If no rows were changed, then the ID must not exist, so 404
-//       return res.status(404).end();
-//     }
-//     res.status(200).end();
-
-//   });
-// });
-
-// // Delete a plan
-// app.delete("/api/plans/:id", function(req, res) {
-//   connection.query("DELETE FROM plans WHERE id = ?", [req.params.id], function(err, result) {
-//     if (err) {
-//       // If an error occurred, send a generic server failure
-//       return res.status(500).end();
-//     }
-//     else if (result.affectedRows === 0) {
-//       // If no rows were changed, then the ID must not exist, so 404
-//       return res.status(404).end();
-//     }
-//     res.status(200).end();
-
-//   });
-// });
-
-// // Start our server so that it can begin listening to client requests.
-// app.listen(PORT, function() {
-//   // Log (server-side) when our server has started
-//   console.log("Server listening on: http://localhost:" + PORT);
-// });
