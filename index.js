@@ -19,17 +19,16 @@ var connection = mysql.createConnection({
   database: "employee_db"
 });
 
-
+//
 
   connection.connect(function(err) {
     if (err) {
       console.error("error connecting: " + err.stack);
       return;
     }
-
-    console.log("connected as id " + connection.threadId);
   });
 
+var inquirer = require('inquirer');
 
 
 
@@ -41,19 +40,93 @@ var connection = mysql.createConnection({
     });
   };
 
+  const showEmployeeNames = () => {
+    connection.query('SELECT CONCAT(first_name," ", last_name) AS Employees FROM employee;', (err, res) => {
+      if (err) throw err;
+      console.table(res)
+      connection.end();
+    });
+  };
 
+  const showRolesWithDep = () => {
+    connection.query('SELECT role.title, role.salary, department.name AS Department_Name FROM role INNER JOIN department ON role.department_id = department.id;', (err, res) => {
+      if (err) throw err;
+      console.table(res)
+      connection.end();
+    });
+  };
 
+  const showDep = () => {
+    connection.query('SELECT * FROM department', (err, res) => {
+      if (err) throw err;
+      console.table(res)
+      connection.end();
+    });
+  };
 
+  const showRoles = () => {
+    connection.query('SELECT title AS Roles FROM role', (err, res) => {
+      if (err) throw err;
+      console.table(res)
+      connection.end();
+    });
+  };
 
+  const newRole = () => {
+    inquirer
+    .prompt([
+      {
+        type: "input",
+        message:"Please input the new role.",
+        name: "title"
+      },
+      {
+        type: "input",
+        message:"Please input the new role's salary.",
+        name: "salary"
+      },
+      {
+        type: "input",
+        message:"Please input the new role's department id.",
+        name: "department_id"
+      }
+    ])
+    .then(answers => {
+      connection.query(`INSERT INTO role (title, salary, department_id) values ('${answers.title}','${answers.salary}','${answers.department_id}')`, (err, res) => {
+        if (err) throw err;
+      });
+    })
+    .catch(error => {
+      if(error.isTtyError) {
+      }
+    });
+  };
 
+  const newDep = () => {
+    inquirer
+    .prompt([
+      {
+        type: "input",
+        message:"Please input the new department.",
+        name: "name"
+      }
+    ])
+    .then(answers => {
+      connection.query(`INSERT INTO department (name) values ('${answers.name}')`, (err, res) => {
+        if (err) throw err;
+      });
+    })
+    .catch(error => {
+      if(error.isTtyError) {
+      }
+    });
+  };
 
-
-allEmployeeView();
-
+newDep();
 
 
 app.listen(PORT);
-console.log('Server running at http://localhost:' + PORT + '/');
+
 // // Use Handlebars to render the main index.html page with the plans in it.
 // app.get("/", function(req, res) {
 //   connection.query("SELECT * FROM plans;", function(err, data) {
